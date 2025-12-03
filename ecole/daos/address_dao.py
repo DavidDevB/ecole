@@ -19,8 +19,16 @@ class AddressDao(Dao[Address]):
         :param address: à créer sous forme d'entité Address en BD
         :return: l'id de l'entité insérée en BD (0 si la création a échoué).
         """
-        ...
-        return 0
+        with Dao.connection.cursor() as cursor:
+            sql = f"INSERT IGNORE INTO address (id_address, street, city, postal_code) VALUES (%s)"
+            cursor.execute(sql, (address.id, address.street, address.street, address.postal_code))
+
+            Dao.connection.commit()
+
+            if cursor.rowcount > 0:
+                return cursor.lastrowid
+            else:
+                return 0
 
     def read(self, id_address: int) -> Optional[Address]:
         """Renvoie l'adresse correspondante à l'entité dont l'id est id_address

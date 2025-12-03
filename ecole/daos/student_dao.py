@@ -19,8 +19,17 @@ class StudentDao(Dao[Student]):
         :param student: à créer sous forme d'entité Student en BD
         :return: l'id de l'entité insérée en BD (0 si la création a échoué).
         """
-        ...
-        return 0
+        with Dao.connection.cursor() as cursor:
+            sql = f"INSERT IGNORE INTO student (student_nbr) VALUES (%s)"
+            cursor.execute(sql, (student.student_nbr,))
+
+            Dao.connection.commit()
+
+            if cursor.rowcount > 0:
+                return cursor.lastrowid
+            else:
+                return 0
+
 
     def read(self, id_student: int) -> Optional[Student]:
         """Renvoie le cours correspondant à l'entité dont l'id est id_student
@@ -28,7 +37,11 @@ class StudentDao(Dao[Student]):
         student: Optional[Student]
 
         with Dao.connection.cursor() as cursor:
-            sql = "SELECT * FROM student WHERE id_student=%s"
+            sql = """
+                    SELECT s.*, p.* 
+                    FROM student s INNER JOIN person p ON s.id_person = p.id_person
+                    WHERE id_student=%s
+                  """
             cursor.execute(sql, (id_student,))
             record = cursor.fetchone()
         if record is not None:
@@ -44,7 +57,10 @@ class StudentDao(Dao[Student]):
 
         students: List[Student] = []
         with Dao.connection.cursor() as cursor:
-            sql = "SELECT * FROM student"
+            sql = """
+                    SELECT s.*, p.* 
+                    FROM student s INNER JOIN person p ON s.id_person = p.id_person
+                  """
             cursor.execute(sql)
             records = cursor.fetchall()
 
