@@ -50,18 +50,17 @@ class CourseDao(Dao[Course]):
             sql = "SELECT * FROM course"
             cursor.execute(sql)
             records = cursor.fetchall()
-        if len(records) > 0:
-            for record in records:
-                course = Course(
-                    name=record["name"],
-                    start_date=record["start_date"],
-                    end_date=record["end_date"]
-                )
-                course.id = record["id_course"]
-                courses.append(course)
-            return courses
-        else:
-            return None
+
+        for record in records:
+            course = Course(
+                name=record["name"],
+                start_date=record["start_date"],
+                end_date=record["end_date"]
+            )
+            course.id = record["id_course"]
+            courses.append(course)
+        return courses
+
 
     def update(self, course: Course) -> bool:
         """Met à jour en BD l'entité Course correspondant à course, pour y correspondre

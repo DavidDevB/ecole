@@ -8,6 +8,7 @@ from models.teacher import Teacher
 from daos.dao import Dao
 from dataclasses import dataclass
 from typing import Optional
+from typing import List
 
 
 @dataclass
@@ -37,6 +38,21 @@ class TeacherDao(Dao[Teacher]):
             teacher = None
 
         return teacher
+
+    def read_all(self):
+        """ Renvoie tous les enseignants """
+
+        teachers: List[Teacher] = []
+        with Dao.connection.cursor() as cursor:
+            sql = "SELECT * FROM teacher"
+            cursor.execute(sql)
+            records = cursor.fetchall()
+
+        for record in records:
+            teacher = Teacher(hiring_date=record["hiring_date"])
+            teacher.id = record["id_teacher"]
+            teachers.append(teacher)
+        return teachers
 
     def update(self, teacher: Teacher) -> bool:
         """Met à jour en BD l'entité Teacher correspondant à teacher, pour y correspondre

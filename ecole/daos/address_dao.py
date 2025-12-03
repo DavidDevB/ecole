@@ -8,6 +8,7 @@ from models.address import Address
 from daos.dao import Dao
 from dataclasses import dataclass
 from typing import Optional
+from typing import List
 
 
 @dataclass
@@ -37,6 +38,26 @@ class AddressDao(Dao[Address]):
             address = None
 
         return address
+
+    def read_all(self):
+        """ Renvoie tous les cours """
+
+        addresses: List[Address] = []
+        with Dao.connection.cursor() as cursor:
+            sql = "SELECT * FROM address"
+            cursor.execute(sql)
+            records = cursor.fetchall()
+
+        for record in records:
+            address = Address(
+                street=record["street"],
+                city=record["city"],
+                postal_code=record["postal_code"]
+            )
+            address.id = record["id_address"]
+            addresses.append(address)
+        return addresses
+
 
     def update(self, address: Address) -> bool:
         """Met à jour en BD l'entité Address correspondant à address, pour y correspondre
