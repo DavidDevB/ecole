@@ -12,6 +12,7 @@ from daos.dao import Dao
 from dataclasses import dataclass
 from typing import Optional
 from typing import List
+from models.teacher import Teacher
 
 
 @dataclass
@@ -47,17 +48,41 @@ class CourseDao(Dao[Course]):
 
         courses: List[Course] = []
         with Dao.connection.cursor() as cursor:
-            sql = "SELECT * FROM course"
+            sql = """
+                    SELECT c.id_course,
+                            c.name,
+                            c.start_date,
+                            c.end_date,
+                            c.id_teacher,
+                            t.hiring_date,
+                            t.id_person,
+                            p.first_name,
+                            p.last_name,
+                            p.age
+                    FROM course c 
+                    INNER JOIN teacher t 
+                    ON c.id_teacher = t.id_teacher
+                    INNER JOIN person p
+                    ON t.id_person = p.id_person;
+                    """
             cursor.execute(sql)
             records = cursor.fetchall()
 
         for record in records:
+            teacher = Teacher(
+                first_name=record["first_name"],
+                last_name=record["last_name"],
+                age=record["age"],
+                hiring_date=record["hiring_date"]
+            )
+
             course = Course(
                 name=record["name"],
                 start_date=record["start_date"],
-                end_date=record["end_date"]
+                end_date=record["end_date"],
             )
-            course.id = record["id_course"]
+            course.id_course = record["id_course"]
+            course.teacher = teacher
             courses.append(course)
         return courses
 

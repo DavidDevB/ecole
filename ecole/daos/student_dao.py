@@ -3,6 +3,10 @@
 """
 Classe Dao[Student]
 """
+from multiprocessing.connection import address_type
+
+from fontTools.varLib.interpolatableTestContourOrder import test_contour_order
+from numpy.f2py.symbolic import as_ge
 
 from models.student import Student
 from daos.dao import Dao
@@ -40,13 +44,17 @@ class StudentDao(Dao[Student]):
             sql = """
                     SELECT s.*, p.* 
                     FROM student s INNER JOIN person p ON s.id_person = p.id_person
-                    WHERE id_student=%s
+                    WHERE student_nbr=%s
                   """
             cursor.execute(sql, (id_student,))
             record = cursor.fetchone()
         if record is not None:
-            student = Student(record['student_nbr'])
-            student.id = record['student_nbr']
+            student = Student(
+                first_name=record["first_name"],
+                last_name=record["last_name"],
+                age=record["age"],
+            )
+            student.student_nbr = record['student_nbr']
         else:
             student = None
 
@@ -65,8 +73,12 @@ class StudentDao(Dao[Student]):
             records = cursor.fetchall()
 
         for record in records:
-            student = Student(record["student_nbr"])
-            student.id = record["student_nbr"]
+            student = Student(
+                first_name=record["first_name"],
+                last_name=record["last_name"],
+                age=record["age"],
+            )
+            student.student_nbr = record['student_nbr']
             students.append(student)
         return students
 

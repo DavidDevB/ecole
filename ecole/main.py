@@ -27,6 +27,10 @@ Bienvenue dans notre école
     print(school.get_course_by_id(2))
     # print(school.get_course_by_id(9))
 
+    #
+    print()
+    school.init_from_bdd()
+
 
 if __name__ == '__main__':
     main()

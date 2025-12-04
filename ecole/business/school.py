@@ -6,12 +6,14 @@ Classe School
 
 from dataclasses import dataclass, field
 from datetime import date
+from typing import LiteralString
 
 from daos.course_dao import CourseDao
 from models.address import Address
 from models.course import Course
 from models.teacher import Teacher
 from models.student import Student
+from daos.student_dao import StudentDao
 
 
 @dataclass
@@ -128,3 +130,17 @@ class School:
         william.add_course(anglais)
 
         michel.add_course(sport)
+
+    def init_from_bdd(self):
+
+        all_students = StudentDao.read_all(StudentDao())
+        for student in all_students:
+            print(f"{student.first_name} {student.last_name} ({student.age} ans), n° étudiant: {student.student_nbr}")
+
+        all_courses = CourseDao.read_all(CourseDao())
+        for course in all_courses:
+            print(f"Cours de {course.name} ({course.start_date} - {course.end_date})\n"
+                  f"Enseigné par {course.teacher.first_name} {course.teacher.last_name} ({course.teacher.age} ans), "
+                  f"arrivé(é) le {course.teacher.hiring_date}")
+            print()
+

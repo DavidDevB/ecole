@@ -33,4 +33,4 @@ class Student(Person):
 
     def __str__(self) -> str:
         person_str = super().__str__()
-        return f"{person_str}, n° étudiant : {self.student_nbr}"
+        return f"{person_str}, n°étudiant : {self.student_nbr}"
