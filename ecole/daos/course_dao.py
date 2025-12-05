@@ -103,8 +103,21 @@ class CourseDao(Dao[Course]):
         :param course: cours déjà mis à jour en mémoire
         :return: True si la mise à jour a pu être réalisée
         """
-        ...
-        return True
+        try:
+            with Dao.connection.cursor() as cursor:
+                sql = """
+                        UPDATE course
+                        SET course_name = %s,
+                            start_date = %s,
+                            end_date = %s
+                        WHERE id_course = %s
+                      """
+                cursor.execute(sql, (course.name, course.start_date, course.end_date, course.id,))
+                Dao.connection.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            print(f"Erreur lors de la mise à jour: {e}")
+            return False
 
     def delete(self, course: Course) -> bool:
         """Supprime en BD l'entité Course correspondant à course
