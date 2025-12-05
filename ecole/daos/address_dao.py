@@ -82,5 +82,14 @@ class AddressDao(Dao[Address]):
         :param address: cours dont l'entité Address correspondante est à supprimer
         :return: True si la suppression a pu être réalisée
         """
-        ...
-        return True
+        try:
+            with Dao.connection.cursor() as cursor:
+                sql = """
+                        DELETE FROM address WHERE id_address=%s
+                      """
+                cursor.execute(sql, (address.id,))
+                Dao.connection.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            print(f"Erreur lors de la suppression: {e}")
+            return False

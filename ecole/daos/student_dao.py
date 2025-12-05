@@ -34,7 +34,6 @@ class StudentDao(Dao[Student]):
             else:
                 return 0
 
-
     def read(self, id_student: int) -> Optional[Student]:
         """Renvoie le cours correspondant à l'entité dont l'id est id_student
            (ou None s'il n'a pu être trouvé)"""
@@ -60,6 +59,7 @@ class StudentDao(Dao[Student]):
 
         return student
 
+    @staticmethod
     def read_all(self):
         """ Renvoie tous les étudiants """
 
@@ -82,7 +82,6 @@ class StudentDao(Dao[Student]):
             students.append(student)
         return students
 
-
     def update(self, student: Student) -> bool:
         """Met à jour en BD l'entité Student correspondant à student, pour y correspondre
 
@@ -98,5 +97,14 @@ class StudentDao(Dao[Student]):
         :param student: cours dont l'entité Student correspondante est à supprimer
         :return: True si la suppression a pu être réalisée
         """
-        ...
-        return True
+        try:
+            with Dao.connection.cursor() as cursor:
+                sql = """
+                        DELETE FROM student WHERE student_nbr=%s
+                      """
+                cursor.execute(sql, (student.student_nbr,))
+                Dao.connection.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            print(f"Erreur lors de la suppression: {e}")
+            return False

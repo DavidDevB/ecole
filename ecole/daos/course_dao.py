@@ -23,8 +23,19 @@ class CourseDao(Dao[Course]):
         :param course: à créer sous forme d'entité Course en BD
         :return: l'id de l'entité insérée en BD (0 si la création a échoué).
         """
-        ...
-        return 0
+        with Dao.connection.cursor() as cursor:
+            sql = """
+                    INSERT IGNORE INTO course (id_course, name, start_date, end_date)
+                    VALUES (%s)
+                  """
+            cursor.execute(sql, (course.id, course.name, course.start_date, course.end_date))
+
+            Dao.connection.commit()
+
+            if cursor.rowcount > 0:
+                return cursor.lastrowid
+            else:
+                return 0
 
     def read(self, id_course: int) -> Optional[Course]:
         """Renvoie le cours correspondant à l'entité dont l'id est id_course
@@ -86,7 +97,6 @@ class CourseDao(Dao[Course]):
             courses.append(course)
         return courses
 
-
     def update(self, course: Course) -> bool:
         """Met à jour en BD l'entité Course correspondant à course, pour y correspondre
 
@@ -102,5 +112,14 @@ class CourseDao(Dao[Course]):
         :param course: cours dont l'entité Course correspondante est à supprimer
         :return: True si la suppression a pu être réalisée
         """
-        ...
-        return True
+        try:
+            with Dao.connection.cursor() as cursor:
+                sql = """
+                        DELETE FROM course WHERE id_course=%s
+                      """
+                cursor.execute(sql, (course.id,))
+                Dao.connection.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            print(f"Erreur lors de la suppression: {e}")
+            return False
